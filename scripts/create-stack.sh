@@ -6,7 +6,7 @@ STACKNAME=${1:-Weapon-X}
 PROJECTNAME=${2:-Weapon-X}
 ENVIRONMENT=${3:-development}
 CREATOR=${4:-CloudFormation}
-TEMPLATELOCATION=${5:-file://$(pwd)/ecs.yml}
+TEMPLATELOCATION=${5:-file://$(pwd)/full-stack.yml}
 
 VALIDATE="aws cloudformation validate-template --template-body $TEMPLATELOCATION"
 echo $VALIDATE
