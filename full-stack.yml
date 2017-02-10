@@ -42,20 +42,15 @@ Parameters:
         Type: 'String'
         Default: 't2.micro'
 
-    ECSRole:
-        Description: 'IAM Role to launch the EC2 instances with'
-        Type: 'String'
-        Default: 'ecsInstanceRole'
-
     VpcURL:
         Description: 'Location of the VPC template file'
         Type: 'String'
-        Default: 'https://raw.githubusercontent.com/kurron/cloud-formation-vpc/master/vpc.yml'
+        Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/vpc.yml'
 
     EcsURL:
         Description: 'Location of the ECS template file'
         Type: 'String'
-        Default: 'https://raw.githubusercontent.com/kurron/cloud-formation-ecs/master/ecs.yml'
+        Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/ecs.yml'
 
 
 Resources:
@@ -75,6 +70,7 @@ Resources:
                     Ref: Notes
                 SshKeyName:
                     Ref: SshKeyName
+
     ECS:
         Type: AWS::CloudFormation::Stack
         DependsOn: VPC
@@ -94,25 +90,23 @@ Resources:
                     Ref: SshKeyName
                 InstanceType:
                     Ref: InstanceType
-                ECSRole:
-                    Ref: ECSRole
                 PublicSubnetZoneA:
-                    - Fn::GetAtt:
-                        - VPC
-                        - Outputs.PublicSubnetZoneA
+                    Fn::GetAtt:
+                    - VPC
+                    - Outputs.PublicSubnetZoneA
                 PrivateSubnetZoneA:
-                    - Fn::GetAtt:
-                        - VPC
-                        - Outputs.PrivateSubnetZoneA
+                    Fn::GetAtt:
+                    - VPC
+                    - Outputs.PrivateSubnetZoneA
                 PublicSubnetZoneB:
-                    - Fn::GetAtt:
-                        - VPC
-                        - Outputs.PublicSubnetZoneB
+                    Fn::GetAtt:
+                    - VPC
+                    - Outputs.PublicSubnetZoneB
                 PrivateSubnetZoneB:
-                    - Fn::GetAtt:
-                        - VPC
-                        - Outputs.PrivateSubnetZoneB
+                    Fn::GetAtt:
+                    - VPC
+                    - Outputs.PrivateSubnetZoneB
                 SecurityGroup:
-                    - Fn::GetAtt:
-                        - VPC
-                        - Outputs.SecurityGroupWideOpen
+                    Fn::GetAtt:
+                    - VPC
+                    - Outputs.SecurityGroupWideOpen
