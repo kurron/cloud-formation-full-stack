@@ -37,10 +37,20 @@ Parameters:
         Type: 'String'
         Default: 'asgard-lite-test'
 
+    Network:
+        Description: 'The ip range to use when building out the VPC network'
+        Type: 'String'
+        Default: '10.0.0.0'
+
     InstanceType:
         Description: 'How large of a box to run your containers on'
         Type: 'String'
-        Default: 't2.micro'
+        Default: 'm4.large'
+
+    SpotPrice:
+        Description: 'Maximum bid price to place on your EC2 instances'
+        Type: 'String'
+        Default: '0.05'
 
     VpcURL:
         Description: 'Location of the VPC template file'
