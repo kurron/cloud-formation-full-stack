@@ -50,7 +50,7 @@ Parameters:
     SpotPrice:
         Description: 'Maximum bid price to place on your EC2 instances'
         Type: 'String'
-        Default: '0.05'
+        Default: '0.10'
 
     VpcURL:
         Description: 'Location of the VPC template file'
@@ -61,6 +61,11 @@ Parameters:
         Description: 'Location of the ECS template file'
         Type: 'String'
         Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/ecs.yml'
+
+    ElbURL:
+        Description: 'Location of the ELB template file'
+        Type: 'String'
+        Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/elb.yml'
 
 
 Resources:
@@ -100,23 +105,41 @@ Resources:
                     Ref: SshKeyName
                 InstanceType:
                     Ref: InstanceType
-                PublicSubnetZoneA:
+                SpotPrice:
+                    Ref: SpotPrice
+                Subnets:
                     Fn::GetAtt:
                     - VPC
-                    - Outputs.PublicSubnetZoneA
-                PrivateSubnetZoneA:
+                    - Outputs.Subnets
+                SecurityGroups:
+                    Fn::GetAtt:
+                        - VPC
+                        - Outputs.SecurityGroupWideOpen
+
+    ELB:
+        Type: AWS::CloudFormation::Stack
+        DependsOn: VPC
+        Properties:
+            TemplateURL:
+                Ref: ElbURL
+            Parameters:
+                Project:
+                    Ref: Project
+                Creator:
+                    Ref: Creator
+                Environment:
+                    Ref: Environment
+                Notes:
+                    Ref: Notes
+                Subnets:
                     Fn::GetAtt:
                     - VPC
-                    - Outputs.PrivateSubnetZoneA
-                PublicSubnetZoneB:
+                    - Outputs.PublicSubnets
+                VPC:
                     Fn::GetAtt:
                     - VPC
-                    - Outputs.PublicSubnetZoneB
-                PrivateSubnetZoneB:
+                    - Outputs.VPC
+                SecurityGroups:
                     Fn::GetAtt:
-                    - VPC
-                    - Outputs.PrivateSubnetZoneB
-                SecurityGroup:
-                    Fn::GetAtt:
-                    - VPC
-                    - Outputs.SecurityGroupWideOpen
+                        - VPC
+                        - Outputs.SecurityGroupWideOpen
