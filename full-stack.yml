@@ -2,7 +2,7 @@
 # Cannot get this to work for some reason
 #AWSTemplateFormatVersion: AWSTemplateFormatVersion: '2010-09-09'
 
-Description: This template creates a new VPC and places EC2 Container Service (ECS) into it.
+Description: This template creates a new VPC and places EC2 Container Services (ECS) into it.
 
 Metadata:
     Foo:
@@ -52,6 +52,11 @@ Parameters:
         Type: 'String'
         Default: '0.10'
 
+    LoadBalancerPort:
+        Description: The port the load balancer should listen on
+        Type: Number
+        Default: 80
+
     VpcURL:
         Description: 'Location of the VPC template file'
         Type: 'String'
@@ -74,6 +79,15 @@ Parameters:
 
 
 Resources:
+    # The Docker containers send their logs here.  I don't know how to conditionally create it which is why
+    # this step is not embedded in the service tamplate
+    CloudWatchLogsGroup:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName:
+                Ref: AWS::StackName
+            RetentionInDays: 7
+
     VPC:
         Type: AWS::CloudFormation::Stack
         Properties:
@@ -148,6 +162,8 @@ Resources:
                     Fn::GetAtt:
                         - VPC
                         - Outputs.SecurityGroupWideOpen
+                LoadBalancerPort:
+                    Ref: LoadBalancerPort
 
     Alpha:
         Type: AWS::CloudFormation::Stack
@@ -176,5 +192,49 @@ Resources:
                     Fn::GetAtt:
                     - ELB
                     - Outputs.PublicLoadBalancerListener
+                ListenerPriority: 1
                 Path: '/alpha'
                 ContainerName: 'alpha'
+                ServiceFamily:
+                    Ref: AWS::StackName
+                LoadBalancerPort:
+                    Ref: LoadBalancerPort
+                LogGroup:
+                    Ref: AWS::StackName
+
+    Bravo:
+        Type: AWS::CloudFormation::Stack
+        DependsOn: ELB
+        Properties:
+            TemplateURL:
+                Ref: ServiceURL
+            Parameters:
+                Project:
+                    Ref: Project
+                Creator:
+                    Ref: Creator
+                Environment:
+                    Ref: Environment
+                Notes:
+                    Ref: Notes
+                VPC:
+                    Fn::GetAtt:
+                    - VPC
+                    - Outputs.VPC
+                Cluster:
+                    Fn::GetAtt:
+                    - ECS
+                    - Outputs.Cluster
+                Listener:
+                    Fn::GetAtt:
+                    - ELB
+                    - Outputs.PublicLoadBalancerListener
+                ListenerPriority: 2
+                Path: '/bravo'
+                ContainerName: 'bravo'
+                ServiceFamily:
+                    Ref: AWS::StackName
+                LoadBalancerPort:
+                    Ref: LoadBalancerPort
+                LogGroup:
+                    Ref: AWS::StackName
