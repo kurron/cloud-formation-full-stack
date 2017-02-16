@@ -67,6 +67,11 @@ Parameters:
         Type: 'String'
         Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/elb.yml'
 
+    ServiceURL:
+        Description: 'Location of the ECS Service template file'
+        Type: 'String'
+        Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/service.yml'
+
 
 Resources:
     VPC:
@@ -143,3 +148,33 @@ Resources:
                     Fn::GetAtt:
                         - VPC
                         - Outputs.SecurityGroupWideOpen
+
+    Alpha:
+        Type: AWS::CloudFormation::Stack
+        DependsOn: ELB
+        Properties:
+            TemplateURL:
+                Ref: ServiceURL
+            Parameters:
+                Project:
+                    Ref: Project
+                Creator:
+                    Ref: Creator
+                Environment:
+                    Ref: Environment
+                Notes:
+                    Ref: Notes
+                VPC:
+                    Fn::GetAtt:
+                    - VPC
+                    - Outputs.VPC
+                Cluster:
+                    Fn::GetAtt:
+                    - ECS
+                    - Outputs.Cluster
+                Listener:
+                    Fn::GetAtt:
+                    - ELB
+                    - Outputs.PublicLoadBalancerListener
+                Path: '/alpha'
+                ContainerName: 'alpha'
