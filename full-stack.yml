@@ -77,6 +77,11 @@ Parameters:
         Type: 'String'
         Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/service.yml'
 
+    CdnURL:
+        Description: 'Location of the CDN template file'
+        Type: 'String'
+        Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/cdn.yml'
+
 
 Resources:
     # The Docker containers send their logs here.  I don't know how to conditionally create it which is why
@@ -165,6 +170,20 @@ Resources:
                 LoadBalancerPort:
                     Ref: LoadBalancerPort
 
+    CDN:
+        Type: AWS::CloudFormation::Stack
+        DependsOn: ELB
+        Properties:
+            TemplateURL:
+                Ref: CdnURL
+            Parameters:
+                LoadBalancerDomainName:
+                    Fn::GetAtt:
+                        - ELB
+                        - Outputs.PublicLoadBalancerUrl
+                LoadBalancerPort:
+                    Ref: LoadBalancerPort
+
     Alpha:
         Type: AWS::CloudFormation::Stack
         DependsOn: ELB
@@ -238,3 +257,12 @@ Resources:
                     Ref: LoadBalancerPort
                 LogGroup:
                     Ref: AWS::StackName
+
+Outputs:
+    CachedDomainName:
+        Description: The DNS name referencing the CDN endpoint
+        Value: !GetAtt CDN.Outputs.DomainName
+
+    DirectDomainName:
+        Description: The DNS name referencing the uncached ELB endpoint
+        Value: !GetAtt ELB.Outputs.PublicLoadBalancerUrl
