@@ -253,7 +253,7 @@ Resources:
 
     Bravo:
         Type: AWS::CloudFormation::Stack
-        DependsOn: ExternalLoadBalancer
+        DependsOn: InternalLoadBalancer
         Properties:
             TemplateURL:
                 Ref: ServiceURL
