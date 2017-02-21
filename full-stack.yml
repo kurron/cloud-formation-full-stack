@@ -140,7 +140,7 @@ Resources:
                         - VPC
                         - Outputs.SecurityGroupWideOpen
 
-    ELB:
+    ExternalLoadBalancer:
         Type: AWS::CloudFormation::Stack
         DependsOn: VPC
         Properties:
@@ -153,8 +153,7 @@ Resources:
                     Ref: Creator
                 Environment:
                     Ref: Environment
-                Notes:
-                    Ref: Notes
+                Notes: 'External Load Balancer'
                 Subnets:
                     Fn::GetAtt:
                     - VPC
@@ -169,24 +168,55 @@ Resources:
                         - Outputs.SecurityGroupWideOpen
                 LoadBalancerPort:
                     Ref: LoadBalancerPort
+                LoadBalancerType: internet-facing
+
+    InternalLoadBalancer:
+        Type: AWS::CloudFormation::Stack
+        DependsOn: VPC
+        Properties:
+            TemplateURL:
+                Ref: ElbURL
+            Parameters:
+                Project:
+                    Ref: Project
+                Creator:
+                    Ref: Creator
+                Environment:
+                    Ref: Environment
+                Notes: 'Internal Load Balancer'
+                Subnets:
+                    Fn::GetAtt:
+                    - VPC
+                    - Outputs.PrivateSubnets
+                VPC:
+                    Fn::GetAtt:
+                    - VPC
+                    - Outputs.VPC
+                SecurityGroups:
+                    Fn::GetAtt:
+                        - VPC
+                        - Outputs.SecurityGroupWideOpen
+                LoadBalancerPort:
+                    Ref: LoadBalancerPort
+                LoadBalancerType: internal
 
     CDN:
         Type: AWS::CloudFormation::Stack
-        DependsOn: ELB
+        DependsOn: ExternalLoadBalancer
         Properties:
             TemplateURL:
                 Ref: CdnURL
             Parameters:
                 LoadBalancerDomainName:
                     Fn::GetAtt:
-                        - ELB
-                        - Outputs.PublicLoadBalancerUrl
+                        - ExternalLoadBalancer
+                        - Outputs.LoadBalancerUrl
                 LoadBalancerPort:
                     Ref: LoadBalancerPort
 
     Alpha:
         Type: AWS::CloudFormation::Stack
-        DependsOn: ELB
+        DependsOn: ExternalLoadBalancer
         Properties:
             TemplateURL:
                 Ref: ServiceURL
@@ -209,8 +239,8 @@ Resources:
                     - Outputs.Cluster
                 Listener:
                     Fn::GetAtt:
-                    - ELB
-                    - Outputs.PublicLoadBalancerListener
+                    - ExternalLoadBalancer
+                    - Outputs.LoadBalancerListener
                 ListenerPriority: 1
                 Path: '/alpha'
                 ContainerName: 'alpha'
@@ -223,7 +253,7 @@ Resources:
 
     Bravo:
         Type: AWS::CloudFormation::Stack
-        DependsOn: ELB
+        DependsOn: ExternalLoadBalancer
         Properties:
             TemplateURL:
                 Ref: ServiceURL
@@ -246,8 +276,8 @@ Resources:
                     - Outputs.Cluster
                 Listener:
                     Fn::GetAtt:
-                    - ELB
-                    - Outputs.PublicLoadBalancerListener
+                    - InternalLoadBalancer
+                    - Outputs.LoadBalancerListener
                 ListenerPriority: 2
                 Path: '/bravo'
                 ContainerName: 'bravo'
@@ -265,4 +295,4 @@ Outputs:
 
     DirectDomainName:
         Description: The DNS name referencing the uncached ELB endpoint
-        Value: !GetAtt ELB.Outputs.PublicLoadBalancerUrl
+        Value: !GetAtt ExternalLoadBalancer.Outputs.LoadBalancerUrl
