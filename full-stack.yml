@@ -82,6 +82,11 @@ Parameters:
         Type: 'String'
         Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/cdn.yml'
 
+    WafURL:
+        Description: 'Location of the WAF template file'
+        Type: 'String'
+        Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/waf.yml'
+
 
 Resources:
     # The Docker containers send their logs here.  I don't know how to conditionally create it which is why
@@ -200,9 +205,23 @@ Resources:
                     Ref: LoadBalancerPort
                 LoadBalancerType: internal
 
+    WAF:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL:
+                Ref: WafURL
+            Parameters:
+                Name:
+                    Ref: AWS::StackName
+                MetricName:
+                    Ref: AWS::StackName
+                Priority: 1
+
     CDN:
         Type: AWS::CloudFormation::Stack
-        DependsOn: ExternalLoadBalancer
+        DependsOn:
+            - ExternalLoadBalancer
+            - WAF
         Properties:
             TemplateURL:
                 Ref: CdnURL
@@ -213,6 +232,10 @@ Resources:
                         - Outputs.LoadBalancerUrl
                 LoadBalancerPort:
                     Ref: LoadBalancerPort
+                WAF:
+                    Fn::GetAtt:
+                        - WAF
+                        - Outputs.ACL
 
     Alpha:
         Type: AWS::CloudFormation::Stack

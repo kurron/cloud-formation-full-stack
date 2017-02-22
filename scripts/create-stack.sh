@@ -2,7 +2,7 @@
 
 # creates a stack in AWS via CloudFromation
 
-STACKNAME=${1:-Weapon-X}
+STACKNAME=${1:-Phoenix}
 PROJECTNAME=${2:-Weapon-X}
 NETWORK=${3:-10.0.0.0}
 INSTANCETYPE=${4:-m4.large}
