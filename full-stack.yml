@@ -227,6 +227,10 @@ Resources:
                     Fn::GetAtt:
                         - WAF
                         - Outputs.ACL
+                Bucket:
+                    Fn::GetAtt:
+                        - ExternalLoadBalancer
+                        - Outputs.LogBucketDomainName
 
     Alpha:
         Type: AWS::CloudFormation::Stack
@@ -312,5 +316,17 @@ Outputs:
         Value: !GetAtt CDN.Outputs.DomainName
 
     DirectDomainName:
-        Description: The DNS name referencing the uncached ELB endpoint
+        Description: The DNS name referencing the uncached external ELB endpoint
         Value: !GetAtt ExternalLoadBalancer.Outputs.LoadBalancerUrl
+
+    InternalDomainName:
+        Description: The DNS name referencing the internal ELB endpoint
+        Value: !GetAtt InternalLoadBalancer.Outputs.LoadBalancerUrl
+
+    InternalLogBucket:
+        Description: The name of the S3 bucket where the internal load balancer places its access logs
+        Value: !GetAtt InternalLoadBalancer.Outputs.LogBucket
+
+    ExternalLogBucket:
+        Description: The name of the S3 bucket where the external load balancer places its access logs
+        Value: !GetAtt ExternalLoadBalancer.Outputs.LogBucket
