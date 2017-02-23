@@ -89,15 +89,6 @@ Parameters:
 
 
 Resources:
-    # The Docker containers send their logs here.  I don't know how to conditionally create it which is why
-    # this step is not embedded in the service tamplate
-    CloudWatchLogsGroup:
-        Type: AWS::Logs::LogGroup
-        Properties:
-            LogGroupName:
-                Ref: AWS::StackName
-            RetentionInDays: 7
-
     VPC:
         Type: AWS::CloudFormation::Stack
         Properties:
@@ -272,7 +263,9 @@ Resources:
                 LoadBalancerPort:
                     Ref: LoadBalancerPort
                 LogGroup:
-                    Ref: AWS::StackName
+                    Fn::GetAtt:
+                        - ECS
+                        - Outputs.SecurityGroupWideOpen
 
     Bravo:
         Type: AWS::CloudFormation::Stack
@@ -309,7 +302,9 @@ Resources:
                 LoadBalancerPort:
                     Ref: LoadBalancerPort
                 LogGroup:
-                    Ref: AWS::StackName
+                    Fn::GetAtt:
+                        - ECS
+                        - Outputs.SecurityGroupWideOpen
 
 Outputs:
     CachedDomainName:
