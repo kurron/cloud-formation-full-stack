@@ -269,7 +269,7 @@ Resources:
                 LogGroup:
                     Fn::GetAtt:
                         - ECS
-                        - Outputs.SecurityGroupWideOpen
+                        - Outputs.LogGroup
 
     Bravo:
         Type: AWS::CloudFormation::Stack
@@ -308,7 +308,7 @@ Resources:
                 LogGroup:
                     Fn::GetAtt:
                         - ECS
-                        - Outputs.SecurityGroupWideOpen
+                        - Outputs.LogGroup
 
 Outputs:
     CachedDomainName:
