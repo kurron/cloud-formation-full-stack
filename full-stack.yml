@@ -87,6 +87,11 @@ Parameters:
         Type: 'String'
         Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/waf.yml'
 
+    CacheURL:
+        Description: 'Location of the ElastiCache template file'
+        Type: 'String'
+        Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/elasticache.yml'
+
 
 Resources:
     VPC:
@@ -105,6 +110,22 @@ Resources:
                     Ref: Notes
                 SshKeyName:
                     Ref: SshKeyName
+
+    Redis:
+        Type: AWS::CloudFormation::Stack
+        DependsOn: VPC
+        Properties:
+            TemplateURL:
+                Ref: CacheURL
+            Parameters:
+                VPC:
+                    Fn::GetAtt:
+                    - VPC
+                    - Outputs.VPC
+                Subnets:
+                    Fn::GetAtt:
+                    - VPC
+                    - Outputs.PrivateSubnets
 
     ECS:
         Type: AWS::CloudFormation::Stack
@@ -330,3 +351,11 @@ Outputs:
     ExternalLogBucket:
         Description: The name of the S3 bucket where the external load balancer places its access logs
         Value: !GetAtt ExternalLoadBalancer.Outputs.LogBucket
+
+    RedisAddress:
+        Description: The DNS address of the configuration endpoint for the Redis cache cluster.
+        Value: !GetAtt Redis.Outputs.Address
+
+    RedisPort:
+        Description: The port number of the configuration endpoint for the Redis cache cluster.
+        Value: !GetAtt Redis.Outputs.Port
