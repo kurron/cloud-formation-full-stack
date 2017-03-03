@@ -7,9 +7,10 @@ PROJECTNAME=${2:-Weapon-X}
 NETWORK=${3:-10.0.0.0}
 INSTANCETYPE=${4:-m4.large}
 SPOTPRICE=${5:-0.03}
-ENVIRONMENT=${6:-development}
-CREATOR=${7:-CloudFormation}
-TEMPLATELOCATION=${8:-file://$(pwd)/full-stack.yml}
+SEARCH_DOMAIN_NAME=${6:-phoenix}
+ENVIRONMENT=${7:-development}
+CREATOR=${8:-CloudFormation}
+TEMPLATELOCATION=${9:-file://$(pwd)/full-stack.yml}
 
 VALIDATE="aws cloudformation validate-template --template-body $TEMPLATELOCATION"
 echo $VALIDATE
@@ -25,6 +26,7 @@ CREATE="aws cloudformation create-stack --stack-name $STACKNAME \
                                                      ParameterKey=Network,ParameterValue=$NETWORK \
                                                      ParameterKey=InstanceType,ParameterValue=$INSTANCETYPE \
                                                      ParameterKey=SpotPrice,ParameterValue=$SPOTPRICE \
+                                                     ParameterKey=SearchDomainName,ParameterValue=$SEARCH_DOMAIN_NAME \
                                         --tags Key=Project,Value=$PROJECTNAME \
                                                Key=Environment,Value=$ENVIRONMENT \
                                                Key=Creator,Value=$CREATOR"
