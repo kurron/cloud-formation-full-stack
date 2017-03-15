@@ -61,6 +61,16 @@ Parameters:
         Description: 'A name for the Amazon ES domain. Valid characters are a-z (lowercase only), 0-9, and – (hyphen).'
         Type: 'String'
 
+    MongoDBInstanceType:
+        Description: 'EC2 instance type to use when assembling the MongoDB cluster'
+        Type: 'String'
+        Default: 't2.small'
+
+    MongoDBVolumeSize:
+        Description: 'The size of the MongoDB data volume, in gibibytes (GiBs).'
+        Type: 'Number'
+        Default: '16'
+
     VpcURL:
         Description: 'Location of the VPC template file'
         Type: 'String'
@@ -101,6 +111,11 @@ Parameters:
         Type: 'String'
         Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/elasticsearch.yml'
 
+    MongoDBURL:
+        Description: 'Location of the MongoDB template file'
+        Type: 'String'
+        Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/mongodb.yml'
+
 
 Resources:
     VPC:
@@ -119,6 +134,36 @@ Resources:
                     Ref: Notes
                 SshKeyName:
                     Ref: SshKeyName
+
+    MongoDB:
+        Type: AWS::CloudFormation::Stack
+        DependsOn: VPC
+        Properties:
+            TemplateURL:
+                Ref: MongoDBURL
+            Parameters:
+                Project:
+                    Ref: Project
+                Creator:
+                    Ref: Creator
+                Environment:
+                    Ref: Environment
+                Notes:
+                    Ref: Notes
+                VPC:
+                    Fn::GetAtt:
+                    - VPC
+                    - Outputs.VPC
+                SshKeyName:
+                    Ref: SshKeyName
+                InstanceType:
+                    Ref: MongoDBInstanceType
+                VolumeSize:
+                    Ref: MongoDBVolumeSize
+                Subnets:
+                    Fn::GetAtt:
+                    - VPC
+                    - Outputs.PrivateSubnets
 
     Search:
         Type: AWS::CloudFormation::Stack
