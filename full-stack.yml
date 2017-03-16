@@ -415,13 +415,21 @@ Outputs:
         Description: The name of the S3 bucket where the external load balancer places its access logs
         Value: !GetAtt ExternalLoadBalancer.Outputs.LogBucket
 
-    RedisAddress:
-        Description: The DNS address of the configuration endpoint for the Redis cache cluster.
-        Value: !GetAtt Redis.Outputs.Address
+    RedisPrimaryAddress:
+        Description: The DNS address of the primary read-write cache node.
+        Value: !GetAtt Redis.Outputs.PrimaryAddress
 
-    RedisPort:
-        Description: The port number of the configuration endpoint for the Redis cache cluster.
-        Value: !GetAtt Redis.Outputs.Port
+    RedisPrimaryPort:
+        Description: The number of the port that the primary read-write cache engine is listening on.
+        Value: !GetAtt Redis.Outputs.PrimaryPort
+
+    RedisSecondaryAddresses:
+        Description: A string with a list of endpoints for the read-only replicas.
+        Value: !GetAtt Redis.Outputs.SecondaryAddresses
+
+    RedisSecondaryPorts:
+        Description: A string with a list of ports for the read-only replicas.
+        Value: !GetAtt Redis.Outputs.SecondaryPorts
 
     SearchAddress:
         Description: The domain-specific endpoint that is used to submit index, search, and data upload requests to an Amazon ES domain.
