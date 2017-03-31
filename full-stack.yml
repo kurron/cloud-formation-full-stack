@@ -71,6 +71,11 @@ Parameters:
         Type: 'Number'
         Default: '16'
 
+    MySQLStorageSize:
+        Description: 'The allocated storage size, specified in gigabytes (GB).'
+        Type: 'String'
+        Default: '16'
+
     VpcURL:
         Description: 'Location of the VPC template file'
         Type: 'String'
@@ -116,6 +121,11 @@ Parameters:
         Type: 'String'
         Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/mongodb.yml'
 
+    RdsURL:
+        Description: 'Location of the MySQL RDS template file'
+        Type: 'String'
+        Default: 'https://s3.amazonaws.com/jvmguy-cloudformation-templates/rds.yml'
+
 
 Resources:
     VPC:
@@ -134,6 +144,32 @@ Resources:
                     Ref: Notes
                 SshKeyName:
                     Ref: SshKeyName
+
+    MySQL:
+        Type: AWS::CloudFormation::Stack
+        DependsOn: VPC
+        Properties:
+            TemplateURL:
+                Ref: RdsURL
+            Parameters:
+                Project:
+                    Ref: Project
+                Creator:
+                    Ref: Creator
+                Environment:
+                    Ref: Environment
+                Notes:
+                    Ref: Notes
+                VPC:
+                    Fn::GetAtt:
+                    - VPC
+                    - Outputs.VPC
+                Subnets:
+                    Fn::GetAtt:
+                    - VPC
+                    - Outputs.PrivateSubnets
+                AllocatedStorage:
+                    Ref: MySQLStorageSize
 
     MongoDB:
         Type: AWS::CloudFormation::Stack
@@ -434,3 +470,19 @@ Outputs:
     SearchAddress:
         Description: The domain-specific endpoint that is used to submit index, search, and data upload requests to an Amazon ES domain.
         Value: !GetAtt Search.Outputs.Endpoint
+
+    MySQLAddress:
+        Description: The connection endpoint for the database.
+        Value: !GetAtt MySQL.Outputs.Address
+
+    MySQLPort:
+        Description: The port number on which the database accepts connections.
+        Value: !GetAtt MySQL.Outputs.Port
+
+    MySQLUsername:
+        Description: The master user name for the DB instance.
+        Value: !GetAtt MySQL.Outputs.MasterUsername
+
+    MySQLPassword:
+        Description: The password for the master database user.
+        Value: !GetAtt MySQL.Outputs.MasterUserPassword
